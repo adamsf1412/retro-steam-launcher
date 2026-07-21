@@ -16,7 +16,7 @@ preg_match('/(\d+)$/',$id,$matches);
 
 $_SESSION['steamid']=$matches[1];
 
-header("Location: index.php");
+header("Location: loading.html");
 
 exit;
 

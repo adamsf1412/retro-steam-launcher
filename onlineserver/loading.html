@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RetroSteam Launcher</title>
+    <style>
+        /* FONT RETRO DOS / CONSOLE */
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: #030303;
+            overflow: hidden;
+            font-family: 'VT323', 'Courier New', monospace;
+        }
+
+        /* 1. EFEK LAPISAN KACA TV CRT */
+        .crt-layer {
+            position: fixed;
+            top: 0; left: 0; 
+            width: 100%; height: 100%;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 0, 0, 0.3) 0px,
+                    rgba(0, 0, 0, 0.3) 2px,
+                    transparent 2px,
+                    transparent 4px
+                ),
+                linear-gradient(
+                    135deg,
+                    rgba(255, 255, 255, 0.08) 0%,
+                    rgba(255, 255, 255, 0.02) 25%,
+                    transparent 50%
+                ),
+                radial-gradient(
+                    circle at center,
+                    transparent 55%,
+                    rgba(0, 0, 0, 0.6) 85%,
+                    rgba(0, 0, 0, 0.95) 100%
+                );
+            pointer-events: none;
+            z-index: 9999;
+            animation: crtFlicker 0.15s infinite;
+        }
+
+        /* 2. LAYAR BOOTING RETRO */
+        #boot-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #050805;
+            color: #d1d1d1;
+            padding: 40px;
+            font-size: 24px;
+            line-height: 1.4;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            text-shadow: 0 0 3px rgba(209, 209, 209, 0.5);
+        }
+
+        /* LOGO RETRO DI POJOK ATAS */
+        .boot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            border-bottom: 2px dashed #333;
+            padding-bottom: 15px;
+        }
+
+        .retro-logo {
+            color: #ff5555;
+            font-weight: bold;
+            font-size: 28px;
+            white-space: pre;
+            line-height: 1;
+            text-shadow: 0 0 6px rgba(255, 85, 85, 0.6);
+        }
+
+        .bios-info {
+            text-align: right;
+            font-size: 20px;
+            color: #aaaaaa;
+        }
+
+        /* BARIS TEKS YANG DIKETIK */
+        .terminal-log {
+            flex-grow: 1;
+        }
+
+        .line {
+            opacity: 0;
+            margin-bottom: 4px;
+            display: none;
+        }
+
+        .line.visible {
+            display: block;
+            animation: fadeInText 0.1s forwards;
+        }
+
+        .success { 
+            color: #55ff55; 
+            text-shadow: 0 0 6px rgba(85, 255, 85, 0.6);
+        }
+        .info { 
+            color: #00ffcc; 
+            text-shadow: 0 0 6px rgba(0, 255, 204, 0.6);
+        }
+
+        /* PERINGATAN KEDAP-KEDIP KUNING TERANG - REDUP */
+        .line.visible.blink-warning {
+            animation: fadeInText 0.1s forwards, yellowBlink 0.4s infinite !important;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 12px;
+            height: 24px;
+            background-color: #d1d1d1;
+            animation: cursorBlink 0.8s infinite;
+            vertical-align: middle;
+            margin-left: 5px;
+            box-shadow: 0 0 4px #d1d1d1;
+        }
+
+        @keyframes fadeInText { to { opacity: 1; } }
+        
+        @keyframes cursorBlink {
+            0%, 49% { background-color: #d1d1d1; }
+            50%, 100% { background-color: transparent; }
+        }
+
+        /* ANIMASI KEDAP-KEDIP TEKS KUNING */
+        @keyframes yellowBlink {
+            0%, 49% {
+                color: #ffff55;
+                text-shadow: 0 0 10px rgba(255, 255, 85, 0.9);
+                opacity: 1;
+            }
+            50%, 100% {
+                color: #ffff55;
+                text-shadow: none;
+                opacity: 0.15;
+            }
+        }
+
+        /* ANIMASI KEDIPAN FLICKER HALUS KACA TV CRT */
+        @keyframes crtFlicker {
+            0% { opacity: 0.96; }
+            50% { opacity: 1; }
+            100% { opacity: 0.98; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Filter Layar Kaca Tabung TV CRT -->
+    <div class="crt-layer"></div>
+
+    <!-- Tampilan Booting Retro -->
+    <div id="boot-screen">
+        <div class="boot-header">
+            <div class="retro-logo">
+◢◤ RETRO LAUNCHER SYSTEM v1.0 ◢◤
+🕹️ STEAM GAMER EMULATION 🕹️
+            </div>
+            <div class="bios-info">
+                AWARD BIOS v4.51PG<br>
+                COPR. 2026 VALVE STEAM INC.<br>
+                JULY 21, 2026
+            </div>
+        </div>
+
+        <div class="terminal-log" id="log-container">
+            <div class="line">ROM BIOS DATE: 07/21/26</div>
+            <div class="line">--------------------------------------------------</div>
+            
+            <!-- LOG NAMA 3 BAHASA -->
+            <div class="line" style="color: #00ffcc; font-weight: bold;">STEAM RETRO LAUNCHER</div>
+            <div class="line" style="color: #00ffcc; font-weight: bold;">Peluncur Retro Steam</div>
+            <div class="line" style="color: #00ffcc; font-weight: bold;">STEAMレトロランチャー</div>
+            
+            <!-- LOG PROCESSOR -->
+            <div class="line" style="margin-top: 10px;">CPU: VALVE STEAM(R) RETRO EMULATION PROCESSOR AT 3.80GHz</div>
+            <div class="line">--------------------------------------------------</div>
+            <div class="line">RAM TEST : <span id="ram-counter">0</span> KB OK</div>
+            
+            <!-- DETEKSI HARDWARE 3 BAHASA -->
+            <div class="line">SYSTEM HARDWARE CHECK:</div>
+            <div class="line">PAPAN KETIK & TETIKUS...... TERDETEKSI <span class="success">[OK]</span></div>
+            <div class="line">KEYBOARD & MOUSE........... DETECTED <span class="success">[OK]</span></div>
+            <div class="line">キーボードとマウス.......... 検出成功 <span class="success">[OK]</span></div>
+            
+            <div class="line">--------------------------------------------------</div>
+            <div class="line">CONNECTING TO STEAM API SERVER ... <span class="success">ONLINE</span></div>
+            <div class="line">--------------------------------------------------</div>
+            
+            <!-- PERINGATAN LOADING 3 BAHASA (KEDAP-KEDIP KUNING) -->
+            <div class="line blink-warning" style="font-weight: bold;">[PERINGATAN] HARAP TUNGGU! PROSES PENGAMBILAN DATA & GAMBAR DARI STEAM MEMANG AGAK LAMA...</div>
+            <div class="line blink-warning" style="font-weight: bold;">[WARNING] PLEASE WAIT! FETCHING DATA & IMAGES FROM STEAM TAKES A WHILE...</div>
+            <div class="line blink-warning" style="font-weight: bold;">【警告】少々お待ちください！STEAMからのデータと画像の取得に時間がかかっています...</div>
+            
+            <!-- SPINNER MEMUTAR -->
+            <div class="line" style="color: #ffff55;">DOWNLOADING STEAM CAPSULE ART ASSETS: <span id="loading-progress" style="font-weight: bold;">|</span></div>
+            <div class="line">--------------------------------------------------</div>
+            
+            <!-- PROSES BOOTING AKHIR 3 BAHASA -->
+            <div class="line">MEMBUKA SISTEM KLIEN RETROSTEAM ...</div>
+            <div class="line">BOOTING TO RETROSTEAM CLIENT SYSTEM ...</div>
+            <div class="line">レトロスチームシステムを起動中 ...</div>
+            
+            <!-- TOMBOL LAUNCHING AKHIR 3 BAHASA -->
+            <div class="line success" style="font-weight: bold; margin-top: 10px;">MENJALANKAN SISTEM SEKARANG!</div>
+            <div class="line success" style="font-weight: bold;">LAUNCHING SYSTEM NOW!</div>
+            <div class="line success" style="font-weight: bold;">システムを実行しています！<span class="cursor"></span></div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const lines = document.querySelectorAll("#log-container .line");
+            let currentLine = 0;
+
+            function showNextLine() {
+                if (currentLine < lines.length) {
+                    let line = lines[currentLine];
+                    line.classList.add("visible");
+
+                    if (line.querySelector("#ram-counter")) {
+                        animateRAM();
+                    } 
+                    else if (line.querySelector("#loading-progress")) {
+                        animateSteamDownload();
+                    } 
+                    else {
+                        currentLine++;
+                        setTimeout(showNextLine, Math.random() * 80 + 30); 
+                    }
+                } else {
+                    // Berpindah langsung ke index.php saat seluruh teks muncul
+                    setTimeout(() => {
+                        window.location.href = "index.php";
+                    }, 800);
+                }
+            }
+
+            function animateRAM() {
+                const ramSpan = document.getElementById("ram-counter");
+                let currentRam = 0;
+                const targetRam = 65536;
+                const increment = 2048;
+
+                const interval = setInterval(() => {
+                    currentRam += increment;
+                    if (currentRam >= targetRam) {
+                        currentRam = targetRam;
+                        clearInterval(interval);
+                        currentLine++;
+                        setTimeout(showNextLine, 150);
+                    }
+                    ramSpan.innerText = currentRam.toLocaleString();
+                }, 15);
+            }
+
+            // SPINNER MEMUTAR TERUS-MENERUS TANPA HENTI & TANPA MENUNGGU
+            function animateSteamDownload() {
+                const progressSpan = document.getElementById("loading-progress");
+                const frames = ['|', '/', '-', '\\'];
+                let frameIndex = 0;
+
+                // Memulai animasi putaran tak terbatas
+                setInterval(() => {
+                    progressSpan.innerText = frames[frameIndex];
+                    frameIndex = (frameIndex + 1) % frames.length;
+                }, 80);
+
+                // Langsung lanjut ke baris berikutnya tanpa jeda
+                currentLine++;
+                setTimeout(showNextLine, 100);
+            }
+
+            setTimeout(showNextLine, 300);
+        });
+    </script>
+</body>
+</html>
